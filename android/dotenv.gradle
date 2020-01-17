@@ -27,7 +27,12 @@ def getEnvFiles(defaultEnvFile) {
     def rootEnvFile = "${project.rootDir}/../../../env/.${arr[1]}.${arr[2]}"
     def localRootEnvFile = "${rootEnvFile}.local"
 
-    return [localRootEnvFile, rootEnvFile]
+    def ENVFILE = System.env['ENVFILE']
+    return [localRootEnvFile, rootEnvFile].findAll{item ->
+        ENVFILE
+            ? item.substring(item.length() - ENVFILE.length(), item.length()) == ENVFILE
+            : true
+     }
 }
 
 def loadDotEnv(flavor = getCurrentFlavor()) {

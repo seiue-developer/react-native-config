@@ -14,15 +14,15 @@ def get_env_files(envs_root, default_env_file)
   root_env_file = "#{envs_root}/../../env/#{env_file_name}"
   local_root_env_file = "#{root_env_file}.local"
 
-  return [
-    local_root_env_file,
-    root_env_file
-  ]
+  specified_env_file = ENV['ENVFILE']
+  return [local_root_env_file, root_env_file].select{ |item|
+    specified_env_file ? item[item.length - specified_env_file.length, item.length] == specified_env_file : true
+  }
 end
 
 # TODO: introduce a parameter which controls how to build relative path
 def read_dot_env(envs_root)
-  defaultEnvFile = ENV['ENVFILE'] || '.env.development'
+  defaultEnvFile = '.env.development'
   puts "going to read env file from root folder #{envs_root}"
 
   env_files = get_env_files(envs_root, defaultEnvFile)
