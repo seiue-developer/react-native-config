@@ -7,12 +7,8 @@ Encoding.default_external = Encoding::UTF_8
 Encoding.default_internal = Encoding::UTF_8
 
 def get_env_files(envs_root, default_env_file)
-  # [, env, development, local]
-  file_arr = default_env_file.split('.')
-  env_file_name = ".#{file_arr[1]}.#{file_arr[2]}"
-
   root_path = "#{envs_root}/../../env"
-  root_env_file = "#{root_path}/#{env_file_name}"
+  root_env_file = "#{root_path}/#{default_env_file}"
   local_root_env_file = "#{root_env_file}.local"
 
   specified_env_file = ENV['ENVFILE']
