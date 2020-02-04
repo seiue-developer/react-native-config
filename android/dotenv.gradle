@@ -24,15 +24,14 @@ def getCurrentFlavor() {
 def getEnvFiles(defaultEnvFile) {
     // [, env, development, local]
     def arr = defaultEnvFile.split("\\.")
-    def rootEnvFile = "${project.rootDir}/../../../env/.${arr[1]}.${arr[2]}"
+    def rootPath = "${project.rootDir}/../../../env"
+    def rootEnvFile = "${rootPath}/.${arr[1]}.${arr[2]}"
     def localRootEnvFile = "${rootEnvFile}.local"
 
     def ENVFILE = System.env['ENVFILE']
-    return [localRootEnvFile, rootEnvFile].findAll{item ->
-        ENVFILE
-            ? item.substring(item.length() - ENVFILE.length(), item.length()) == ENVFILE
-            : true
-     }
+    return ENVFILE
+        ? ["${rootPath}/${ENVFILE}"]
+        : [localRootEnvFile, rootEnvFile]
 }
 
 def loadDotEnv(flavor = getCurrentFlavor()) {
