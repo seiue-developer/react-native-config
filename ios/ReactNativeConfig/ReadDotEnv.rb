@@ -6,29 +6,36 @@
 Encoding.default_external = Encoding::UTF_8
 Encoding.default_internal = Encoding::UTF_8
 
+def get_env_files(envs_root, default_env_file)
+  root_path = "#{envs_root}/../../env"
+  root_env_file = "#{root_path}/#{default_env_file}"
+  local_root_env_file = "#{root_env_file}.local"
+
+  specified_env_file = ENV['ENVFILE']
+  return specified_env_file ? ["#{root_path}/#{specified_env_file}"] : [local_root_env_file, root_env_file]
+end
+
 # TODO: introduce a parameter which controls how to build relative path
 def read_dot_env(envs_root)
-  defaultEnvFile = '.env'
+  defaultEnvFile = '.env.development'
   puts "going to read env file from root folder #{envs_root}"
 
-  # pick a custom env file if set
-  if File.exist?('/tmp/envfile')
-    custom_env = true
-    file = File.read('/tmp/envfile').strip
-  else
-    custom_env = false
-    file = ENV['ENVFILE'] || defaultEnvFile
+  env_files = get_env_files(envs_root, defaultEnvFile)
+  target_env_file_path = ''
+
+  for path in env_files
+    if File.exist?(path)
+      target_env_file_path = path
+      break
+    end
   end
 
   dotenv = begin
     # https://regex101.com/r/cbm5Tp/1
     dotenv_pattern = /^(?:export\s+|)(?<key>[[:alnum:]_]+)=((?<quote>["'])?(?<val>.*?[^\\])\k<quote>?|)$/
 
-    path = File.expand_path(File.join(envs_root, file.to_s))
-    if File.exist?(path)
-      raw = File.read(path)
-    elsif File.exist?(file)
-      raw = File.read(file)
+    if File.exist?(target_env_file_path)
+      raw = File.read(target_env_file_path)
     else
       defaultEnvPath = File.expand_path(File.join(envs_root, "../#{defaultEnvFile}"))
       unless File.exist?(defaultEnvPath)
@@ -50,9 +57,10 @@ def read_dot_env(envs_root)
     end
     rescue Errno::ENOENT
       puts('**************************')
-      puts('*** Missing .env file ****')
+      puts("*** Missing #{defaultEnvFile} file ****")
       puts('**************************')
       return [{}, false] # set dotenv as an empty hash
   end
-  [dotenv, custom_env]
+
+  [dotenv, false]
 end
